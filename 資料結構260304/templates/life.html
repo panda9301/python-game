@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>人生模擬器</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 920px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 40px 30px;
+      text-align: center;
+    }
+
+    .header h1 {
+      font-size: 2.5em;
+      margin-bottom: 10px;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    .header p {
+      font-size: 1.05em;
+      opacity: 0.95;
+      font-weight: 300;
+    }
+
+    .main-content {
+      padding: 40px 30px;
+    }
+
+    .status {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 35px;
+    }
+
+    .status-item {
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.8);
+    }
+
+    .status-item.day {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .status-item.money {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      color: white;
+    }
+
+    .status-item.study {
+      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+      color: white;
+    }
+
+    .status-item.mood {
+      background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+      color: white;
+    }
+
+    .status-item.health {
+      background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);
+      color: white;
+    }
+
+    .status-item label {
+      display: block;
+      font-size: 0.85em;
+      opacity: 0.9;
+      margin-bottom: 8px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .status-item .value {
+      font-size: 2.2em;
+      font-weight: 700;
+      display: block;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 3px;
+      margin-top: 10px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: rgba(255, 255, 255, 0.8);
+      border-radius: 3px;
+      transition: width 0.3s ease;
+    }
+
+    .log-section h2 {
+      color: #333;
+      margin-bottom: 15px;
+      font-size: 1.3em;
+      font-weight: 600;
+    }
+
+    .log-box {
+      height: 300px;
+      overflow-y: auto;
+      border: 2px solid #e8eef5;
+      border-radius: 12px;
+      padding: 15px;
+      background: #fafbff;
+      font-size: 0.95em;
+      line-height: 1.6;
+      color: #333;
+      white-space: pre-wrap;
+      word-break: break-word;
+      box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .log-box::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .log-box::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 10px;
+    }
+
+    .log-box::-webkit-scrollbar-thumb {
+      background: #667eea;
+      border-radius: 10px;
+    }
+
+    .log-box::-webkit-scrollbar-thumb:hover {
+      background: #764ba2;
+    }
+
+    .actions-section {
+      margin-top: 35px;
+    }
+
+    .actions-section h2 {
+      color: #333;
+      margin-bottom: 20px;
+      font-size: 1.3em;
+      font-weight: 600;
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 15px;
+    }
+
+    button {
+      padding: 16px 20px;
+      border: none;
+      border-radius: 12px;
+      font-size: 1.05em;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    button[value="1"] {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    button[value="2"] {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      color: white;
+    }
+
+    button[value="3"] {
+      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+      color: white;
+    }
+
+    button[value="4"] {
+      background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+      color: white;
+    }
+
+    button:hover:not([disabled]) {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    button:active:not([disabled]) {
+      transform: translateY(-1px);
+    }
+
+    button[disabled] {
+      background: #ccc;
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
+
+    .ending {
+      margin-top: 35px;
+      padding: 25px;
+      border-radius: 15px;
+      background: linear-gradient(135deg, #fff5e6 0%, #ffe5cc 100%);
+      border: 2px solid #ffc107;
+      box-shadow: 0 5px 15px rgba(255, 193, 7, 0.2);
+    }
+
+    .ending strong {
+      display: block;
+      font-size: 1.3em;
+      color: #856404;
+      margin-bottom: 12px;
+    }
+
+    .ending p {
+      color: #333;
+      line-height: 1.8;
+      font-size: 1.05em;
+    }
+
+    .game-over-message {
+      text-align: center;
+      color: #666;
+      font-size: 1.1em;
+      padding: 20px;
+      background: #f0f0f0;
+      border-radius: 10px;
+      margin-top: 20px;
+    }
+
+    @media (max-width: 768px) {
+      .header h1 { font-size: 2em; }
+      .status { grid-template-columns: repeat(2, 1fr); }
+      .actions { grid-template-columns: 1fr; }
+      .main-content { padding: 25px 20px; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>✨ 人生模擬器 ✨</h1>
+    <p>你有 30 天時間，決定每天要做什麼。沒有正確答案，只看你想過怎樣的人生。</p>
+  </div>
+
+  <div class="main-content">
+    <div class="status">
+      <div class="status-item day">
+        <label>進度</label>
+        <span class="value">{{ day }}/30</span>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: {{ (day / 30) * 100 }}%"></div>
+        </div>
+      </div>
+
+      <div class="status-item money">
+        <label>💰 金錢</label>
+        <span class="value">{{ money }}</span>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: {{ min((money / 5000) * 100, 100) }}%"></div>
+        </div>
+      </div>
+
+      <div class="status-item study">
+        <label>📚 學習力</label>
+        <span class="value">{{ study }}</span>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: {{ min((study / 100) * 100, 100) }}%"></div>
+        </div>
+      </div>
+
+      <div class="status-item mood">
+        <label>😊 心情</label>
+        <span class="value">{{ mood }}/100</span>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: {{ mood }}%"></div>
+        </div>
+      </div>
+
+      <div class="status-item health">
+        <label>❤️ 健康</label>
+        <span class="value">{{ health }}/100</span>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: {{ health }}%"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="log-section">
+      <h2>📖 遊戲日誌</h2>
+      <div class="log-box">
+        {% for line in logs %}
+        {{ line }}<br>
+        {% endfor %}
+      </div>
+    </div>
+
+    <form method="post">
+      <!-- 隱藏欄位保存狀態 -->
+      <input type="hidden" name="day" value="{{ day }}">
+      <input type="hidden" name="money" value="{{ money }}">
+      <input type="hidden" name="study" value="{{ study }}">
+      <input type="hidden" name="mood" value="{{ mood }}">
+      <input type="hidden" name="health" value="{{ health }}">
+      <input type="hidden" name="logs" value="{{ '\n'.join(logs) }}">
+
+      <div class="actions-section">
+        {% if not game_over %}
+        <h2>今天你想要做什麼？</h2>
+        <div class="actions">
+          <button type="submit" name="choice" value="1">📚 認真讀書</button>
+          <button type="submit" name="choice" value="2">💼 去打工</button>
+          <button type="submit" name="choice" value="3">😴 好好休息</button>
+          <button type="submit" name="choice" value="4">🎉 出去玩</button>
+        </div>
+        {% else %}
+        <div class="game-over-message">
+          <p>🎊 遊戲已結束</p>
+          <button type="submit" name="restart" value="1" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); margin-top: 15px; padding: 12px 32px; font-size: 1.05em;">🔄 重新開始</button>
+        </div>
+        {% endif %}
+      </div>
+    </form>
+
+    {% if game_over %}
+    <div class="ending">
+      <strong>🏆 人生總結</strong>
+      <p>{{ ending }}</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+</body>
+</html>
